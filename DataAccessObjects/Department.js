@@ -21,16 +21,47 @@ class Department {
 		this.name = name;
 	};
 
-	add() {
-
+	add(connection, callback) {
+		const queryStmt =  `INSERT INTO
+							  department (
+								  name
+							  ) VALUES (
+								  "${this.name}"
+							  )`;
+		connection.query(queryStmt, (err, result) => {
+			if (err)
+				callback(err, null);
+			else
+				callback(null, result);
+		});
 	};
 	
-	update() {
-
+	update(connection, callback) {
+		const queryStmt =  `UPDATE
+							  department
+							SET
+							  name = "${this.name}"
+							WHERE
+							  id = ${this.id}`;
+		connection.query(queryStmt, (err, result) => {
+			if (err)
+				callback(err, null);
+			else
+				callback(null, result);
+		});
 	};
 
-	delete() {
-
+	delete(connection, callback) {
+		const queryStmt =  `DELETE FROM
+							  department
+							WHERE
+							  id = ${this.id}`;
+		connection.query(queryStmt, (err, result) => {
+			if (err)
+				callback(err, null);
+			else
+				callback(null, result);
+		});
 	};
 
 	getRecord() {
@@ -39,7 +70,9 @@ class Department {
 
 	getAllRecords(connection, callback) {
 		const queryStmt =  `SELECT
-							  *
+							  id,
+							  name,
+							  CONCAT('$', FORMAT(budget_used,2)) budget_used
 							FROM 
 							  deptInfo 
 							ORDER BY 

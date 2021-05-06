@@ -30,6 +30,55 @@ class Role {
 		this.department_id = department_id;
 	};
 
+	add(connection, callback) {
+		const queryStmt =  `INSERT INTO
+							  role (
+								title,
+								salary,
+								department_id
+							  ) VALUES (
+								  "${this.title}",
+								  ${this.salary},
+								  ${this.department_id}
+							  )`;
+		connection.query(queryStmt, (err, result) => {
+			if (err)
+				callback(err, null);
+			else
+				callback(null, result);
+		});
+	};
+	
+	update(connection, callback) {
+		const queryStmt =  `UPDATE
+							  role
+							SET
+							  title = "${this.title}",
+							  salary = ${this.salary},
+							  department_id = ${this.department_id}
+							WHERE
+							  id = ${this.id}`;
+		connection.query(queryStmt, (err, result) => {
+			if (err)
+				callback(err, null);
+			else
+				callback(null, result);
+		});
+	};
+
+	delete(connection, callback) {
+		const queryStmt =  `DELETE FROM
+							  role
+							WHERE
+							  id = ${this.id}`;
+		connection.query(queryStmt, (err, result) => {
+			if (err)
+				callback(err, null);
+			else
+				callback(null, result);
+		});
+	};
+
 	getAllRecords(connection, callback) {
 		const queryStmt = `SELECT
 		                     id,

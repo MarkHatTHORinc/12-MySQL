@@ -91,7 +91,7 @@ AS
   SELECT
     d.id,
     d.name,
-    sum(e.salary)
+    COALESCE(sum(e.salary), 0)
   FROM
     department AS d
       LEFT OUTER JOIN empInfo AS e

@@ -17,15 +17,16 @@ const Employee = require('./DataAccessObjects/Employee');
 // Global Variables
 let managerArray = [];
 let roleArray = [];
+let roleTitleArray = [];
 let deptArray = [];
+let deptNameArray = [];
 let employee_IDArray = [];
 let employeeFirstNameArray = [];
 let manager_IDArray = [];
-let role_IDArray = [];
 
 let deptObj = new Department(null, null);
 let empObj = new Employee(null, null, null, null);
-let roleObj = new Role(null, null,null);
+let roleObj = new Role(null, null, null);
 
 // create the connection information for the sql database
 const connection = mysql.createConnection({
@@ -107,26 +108,25 @@ const employeesMenu = () => {
             // perform the menu option selected
             switch (answer.empMenuOpt) {
                 case 'Department Maintenance':
-                    departmentMaintenance()
+                    departmentMaintenance();
                     break;
                 case 'Role Maintenance':
                     roleMaintenance();
                     break;
                 case 'Employee Maintenance':
-                    employeeMaintenance()
+                    employeeMaintenance();
                     break;
                 case 'Reports Menu':
-                    reportsMenu()
+                    reportsMenu();
                     break;
                 default:
-                    connectionEnd()
+                    connectionEnd();
                     break;
             }
         });
 };
 
-// function which provides a menu of options to the user
-
+// function provides a menu of report options to the user
 const reportsMenu = () => {
     console.clear();
     console.log(
@@ -152,19 +152,19 @@ const reportsMenu = () => {
             // perform the menu option selected
             switch (answer.repMenuOpt) {
                 case 'Department List':
-                    departmentList()
+                    departmentList();
                     break;
                 case 'Role List':
                     roleList();
                     break;
                 case 'Employee List':
-                    employeeList()
+                    employeeList();
                     break;
                 case 'Return to Employees Menu':
-                    employeesMenu()
+                    employeesMenu();
                     break;
                 default:
-                    connectionEnd()
+                    connectionEnd();
                     break;
             }
         });
@@ -175,10 +175,15 @@ const departmentMaintenance = () => {
 
     resultSet = deptObj.getAllRecords(connection, (err, resultSet) => {
         deptArray.length = 0;
-        resultSet.forEach(({ id, name }) => {
-            deptArray.push(name);
+        deptNameArray.length = 0;
+        resultSet.forEach(({ id, name, budget_used }) => {
+            let id_name = id + '    ';
+            id_name = id_name.substr(0, 4) + '- ' + name;
+            deptArray.push(id_name);
+            deptNameArray.push(name);
         });
         deptArray.push('** Add **');
+        deptArray.push('** Cancel **');
         getDepartmentInput();
     });
 };
@@ -191,12 +196,27 @@ const getDepartmentInput = () => {
             {
                 name: 'dept',
                 type: 'list',
-                message: 'What department do you want to Change or ** Add **?',
+                pageSize: 12,
+                message: 'What department do you want to Change or ** Add **, ** Cancel ** ?',
                 choices: deptArray,
             },
         ])
         .then((answer) => {
-            let status = (answer === '** Add **' ? addDepartment() : updateDepartment(answer));
+            // let status = (answer.dept == '** Add **' ? addDepartment() : updateDepartment(answer));
+            // perform the menu option selected
+            switch (answer.dept) {
+                case '** Add **':
+                    addDepartment();
+                    break;
+                case '** Cancel **':
+                    employeesMenu();
+                    break;
+                default:
+                    let id = answer.dept.substr(0, 4).trim();
+                    let name = answer.dept.substr(6);
+                    updateDepartment(id, name);
+                    break;
+            }
         });
 };
 
@@ -208,55 +228,135 @@ const addDepartment = () => {
             {
                 name: 'name',
                 type: 'input',
-                message: 'What is the department name?',
+                message: 'What is the department name (BLANK to Return) ?',
                 validate(value) {
-                    const deptName = value.trim; 
-                    if (deptName.length > 0) {
-                      const isDeptInArray = (element) => element.toLowerCase() == deptName.toLowerCase(); 
-                      if (deptArray.findIndex(isDeptInArray) < 0) 
+                    const deptName = value.trim();
+                    // if (deptName.length > 0) {
+                    // Prevent duplicates from being entered
+                    const isDeptInArray = (element) => element.toLowerCase() == deptName.toLowerCase();
+                    if (deptNameArray.findIndex(isDeptInArray) < 0)
                         return true;
-                    }
-                    return false;
+                    // }
+                    // return false;
                 },
             },
         ])
         .then((answer) => {
-            deptArray.pop();
-            deptObj.add(answer.trim);
-            deptArray.push(answer.trim);
-            console.log(`** Department ${answer.trim} added. **`)
-            pressAnyKey()
-            .then(() => {
-                employeesMenu();
-            });
-        });
+            // deptArray.pop();  // Remove the ** Cancel ** entry
+            // deptArray.pop();  // Remove the ** Add ** entry
+            const deptName = answer.name.trim();
+            if (deptName.length > 0) {
+                deptObj.setName(deptName);
+                result = deptObj.add(connection, (err, result) => {
+                    if (err) throw err;
+                    console.clear();
+                    console.log(
+                        chalk.green(`    
+-----------------------------------------------------------------------------------------
+ Added Department ${deptName}.  
+-----------------------------------------------------------------------------------------
+`)
+                    );
+                    deptArray.push(answer.name.trim());
+                    pressAnyKey()
+                        .then(() => {
+                            employeesMenu();
+                        });
+                }
+                )
+            } else departmentMaintenance();
+        })
 };
 
 // update department 
-const updateDepartment = (id) => {
+const updateDepartment = (id, name) => {
     // prompt for info for a new department
     inquirer
         .prompt([
             {
                 name: 'name',
                 type: 'input',
-                message: 'What is changed department name (BLANK to Delete)?',
+                message: 'What is changed department name (BLANK to Return, DELETE to Delete) ?',
+                validate(value) {
+                    const deptName = value.trim();
+                    // if (deptName.length > 0) {
+                    // Prevent duplicates from being entered
+                    const isDeptInArray = (element) => element.toLowerCase() == deptName.toLowerCase();
+                    if (deptNameArray.findIndex(isDeptInArray) < 0)
+                        return true;
+                    // }
+                    // return false;
+                },
             },
         ])
         .then((answer) => {
-            // when finished prompting, insert a new department record
-            // TODO: create department object
-            // if (answer.trim.length === 0)
-            //     department.delete(department);
-            // else 
-            //     department.update(department);
-            console.log('Working on dept recorrd');
-        });
+            // deptArray.pop();  // Remove the ** Cancel ** entry
+            // deptArray.pop();  // Remove the ** Add ** entry
+            const deptName = answer.name.trim();
+            switch (deptName.toUpperCase()) {
+                case '':
+                    departmentMaintenance();
+                    break;
+                case 'DELETE':
+                    deptObj.setId(id);
+                    result = deptObj.delete(connection, (err, result) => {
+                        if (err) throw err;
+                        console.clear();
+                        console.log(
+                            chalk.red(`    
+-----------------------------------------------------------------------------------------
+ Deleted Department ${name}.  
+-----------------------------------------------------------------------------------------
+                    `)
+                        );
+                        deptArray.push(answer.name.trim());
+                        pressAnyKey()
+                            .then(() => {
+                                employeesMenu();
+                            });
+                    }
+                    )
+                    break;
+                default:
+                    deptObj.setId(id);
+                    deptObj.setName(deptName);
+                    result = deptObj.update(connection, (err, result) => {
+                        if (err) throw err;
+                        console.clear();
+                        console.log(
+                            chalk.green(`    
+-----------------------------------------------------------------------------------------
+Updated Department ${deptName}.  
+-----------------------------------------------------------------------------------------
+`)
+                        );
+                        deptArray.push(answer.name.trim());
+                        pressAnyKey()
+                            .then(() => {
+                                employeesMenu();
+                            });
+                    }
+                    )
+                    break;
+            }
+        })
 };
 
 // role maintenance
 const roleMaintenance = () => {
-    console.log('In role maintenance');
+    resultSet = roleObj.getAllRecords(connection, (err, resultSet) => {
+        roleArray.length = 0;
+        roleNameArray.length = 0;
+        resultSet.forEach(({ id, title, budget_used }) => {
+            let id_title = id + '    ';
+            id_title = id_title.substr(0, 4) + '- ' + title;
+            roleArray.push(id_name);
+            roleTitleArray.push(title);
+        });
+        roleArray.push('** Add **');
+        roleArray.push('** Cancel **');
+        //getRoleInput();
+    });
 };
 
 
@@ -269,32 +369,14 @@ const employeeMaintenance = () => {
 // department List
 const departmentList = () => {
     resultSet = deptObj.getAllRecords(connection, (err, resultSet) => {
+        if (err) throw err;
         console.clear();
         console.log(
             chalk.yellow(`    
-    -----------------------------------------------------------------------------------------
-                        D E P A R T M E N T    L I S T   
-    -----------------------------------------------------------------------------------------
-    `)
-        );
-        console.table(resultSet);
-        pressAnyKey()
-            .then(() => {
-                reportsMenu();
-            });
-    });
-};
-
-// department budget utilization List
-const departmentBudgetList = () => {
-    resultSet = deptObj.getAllRecordsWithBudget(connection, (err, resultSet) => {
-        console.clear();
-        console.log(
-            chalk.yellow(`    
-    -----------------------------------------------------------------------------------------
-            D E P A R T M E N T    B U D G E T    U T I L I Z A T I O N   
-    -----------------------------------------------------------------------------------------
-    `)
+-----------------------------------------------------------------------------------------
+                    D E P A R T M E N T    L I S T   
+-----------------------------------------------------------------------------------------
+`)
         );
         console.table(resultSet);
         pressAnyKey()
@@ -307,13 +389,14 @@ const departmentBudgetList = () => {
 // role list
 const roleList = () => {
     resultSet = roleObj.getAllRecords(connection, (err, resultSet) => {
+        if (err) throw err;
         console.clear();
         console.log(
             chalk.yellow(`    
-    -----------------------------------------------------------------------------------------
-                            R O L E    L I S T   
-    -----------------------------------------------------------------------------------------
-    `)
+-----------------------------------------------------------------------------------------
+                        R O L E    L I S T   
+-----------------------------------------------------------------------------------------
+`)
         );
         console.table(resultSet);
         pressAnyKey()
@@ -326,13 +409,14 @@ const roleList = () => {
 // employee list
 const employeeList = () => {
     resultSet = empObj.getAllRecords(connection, (err, resultSet) => {
+        if (err) throw err;
         console.clear();
         console.log(
             chalk.yellow(`    
-    -----------------------------------------------------------------------------------------
-                        E M P L O Y E E    L I S T   
-    -----------------------------------------------------------------------------------------
-    `)
+-----------------------------------------------------------------------------------------
+                    E M P L O Y E E    L I S T   
+-----------------------------------------------------------------------------------------
+`)
         );
         console.table(resultSet);
         pressAnyKey()
