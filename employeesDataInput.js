@@ -174,8 +174,6 @@ const reportsMenu = () => {
 const departmentMaintenance = () => {
 
     resultSet = deptObj.getAllRecords(connection, (err, resultSet) => {
-        // console.log('\n\n');
-        // console.table(resultSet);
         deptArray.length = 0;
         resultSet.forEach(({ id, name }) => {
             deptArray.push(name);
@@ -212,7 +210,10 @@ const addDepartment = () => {
                 type: 'input',
                 message: 'What is the department name?',
                 validate(value) {
-                    if (value.trim.length > 0) {
+                    const deptName = value.trim; 
+                    if (deptName.length > 0) {
+                      const isDeptInArray = (element) => element.toLowerCase() == deptName.toLowerCase(); 
+                      if (deptArray.findIndex(isDeptInArray) < 0) 
                         return true;
                     }
                     return false;
@@ -220,10 +221,14 @@ const addDepartment = () => {
             },
         ])
         .then((answer) => {
-            // when finished prompting, insert a new department record
-            // TODO: create department object
-            // return department.add(department);
-            return true;
+            deptArray.pop();
+            deptObj.add(answer.trim);
+            deptArray.push(answer.trim);
+            console.log(`** Department ${answer.trim} added. **`)
+            pressAnyKey()
+            .then(() => {
+                employeesMenu();
+            });
         });
 };
 
@@ -269,6 +274,25 @@ const departmentList = () => {
             chalk.yellow(`    
     -----------------------------------------------------------------------------------------
                         D E P A R T M E N T    L I S T   
+    -----------------------------------------------------------------------------------------
+    `)
+        );
+        console.table(resultSet);
+        pressAnyKey()
+            .then(() => {
+                reportsMenu();
+            });
+    });
+};
+
+// department budget utilization List
+const departmentBudgetList = () => {
+    resultSet = deptObj.getAllRecordsWithBudget(connection, (err, resultSet) => {
+        console.clear();
+        console.log(
+            chalk.yellow(`    
+    -----------------------------------------------------------------------------------------
+            D E P A R T M E N T    B U D G E T    U T I L I Z A T I O N   
     -----------------------------------------------------------------------------------------
     `)
         );

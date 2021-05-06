@@ -38,10 +38,10 @@ class Department {
 	};
 
 	getAllRecords(connection, callback) {
-		const queryStmt = `SELECT
-							 *
+		const queryStmt =  `SELECT
+							  *
 							FROM 
-							  department 
+							  deptInfo 
 							ORDER BY 
 							  name`;
 		connection.query(queryStmt, (err, resultSet) => {

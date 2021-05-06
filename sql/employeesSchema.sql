@@ -4,13 +4,13 @@ CREATE DATABASE employeesDB;
 
 USE employeesDB;
 
-CREATE OR REPLACE TABLE department (
+CREATE TABLE department (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(30) NOT NULL,
   PRIMARY KEY (id)
 );
 
-CREATE OR REPLACE TABLE role (
+CREATE TABLE role (
   id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(30) NOT NULL,
   salary INT NOT NULL,
@@ -19,7 +19,7 @@ CREATE OR REPLACE TABLE role (
   CONSTRAINT FK_departmentRole FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE RESTRICT
 );
 
-CREATE OR REPLACE TABLE employee (
+CREATE TABLE employee (
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30) NOT NULL,
@@ -73,7 +73,7 @@ AS
     r.department_id,
     r.department_name,
     e.manager_id,
-    CONCAT_WS(',', m.last_name, m.first_name)
+    CONCAT_WS(', ', m.last_name, m.first_name)
   FROM
     employee AS e
       LEFT OUTER JOIN roleInfo AS r
@@ -82,16 +82,16 @@ AS
         ON e.manager_id = m.id
 ;
 
-CREATE OR REPLACE VIEW depInfo (
+CREATE OR REPLACE VIEW deptInfo (
   id,
   name,
-  budgeted
+  budget_used
 )
 AS 
   SELECT
     d.id,
     d.name,
-    e.salary
+    sum(e.salary)
   FROM
     department AS d
       LEFT OUTER JOIN empInfo AS e

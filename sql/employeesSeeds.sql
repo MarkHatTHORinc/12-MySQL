@@ -313,8 +313,8 @@ VALUES
 																                                            FROM 
                                                                               role as r 
 																                                            WHERE 
-                                                                              lower(r.title) = 'ceo' LIMIT 1))
+                                                                              lower(r.title) = 'systems architect' LIMIT 1))
 												                                    SELECT 
                                                               id 
 												                                    FROM 
-                                                              newMgr)):
+                                                              newMgr));

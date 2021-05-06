@@ -33,9 +33,9 @@ class Role {
 	getAllRecords(connection, callback) {
 		const queryStmt = `SELECT
 		                     id,
-							 title as 'Job Title',
-							 salary as Salary,
-							 department_name as Department
+							 title,
+							 CONCAT('$', FORMAT(salary,2)) salary,
+							 department_name as department
 						   FROM
 						     roleInfo
 						   ORDER BY

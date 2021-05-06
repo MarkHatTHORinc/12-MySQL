@@ -50,16 +50,18 @@ class Employee {
 
 	getAllRecords(connection, callback) {
 		const queryStmt = `SELECT
-		                     e.id,
-							 e.first_name,
-							 e.last_name,
-							 e.role_id,
-							 COALESCE(e.manager_id, 'SELF') as manager
+		                     id,
+							 first_name,
+							 last_name,
+							 title,
+							 CONCAT('$', FORMAT(salary,2)) salary,
+							 department_name,
+							 manager_name
 						   FROM
-						   	 employee as e
+						   	 empInfo
 						   ORDER BY
-						     e.last_name,
-							 e.first_name`;
+						     last_name,
+							 first_name`;
 		connection.query(queryStmt, (err, resultSet) => {
 			if (err)
 				callback(err, null);
