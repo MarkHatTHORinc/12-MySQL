@@ -441,7 +441,7 @@ const addDepartment = () => {
                     );
                     pressAnyKey()
                         .then(() => {
-                            displayMaintenanceMenu();
+                            maintainDepartments();
                         });
                 })
             } else maintainDepartments();
@@ -493,7 +493,7 @@ const updateDepartment = (id, name) => {
                         if (resultSet.length > 0) {
                             console.clear();
                             console.log(
-                                chalk.red(buildHeadings(LEFT, `Department ${deptName} cannot be deleted because it is used by roles:`))
+                                chalk.red(buildHeadings(LEFT, `Department ${name} cannot be deleted because it is used by roles:`))
                             );
                             chalk.red(console.table(resultSet));
                             pressAnyKey()
@@ -505,7 +505,7 @@ const updateDepartment = (id, name) => {
                                 if (err) throw err;
                                 console.clear();
                                 console.log(
-                                    chalk.red(buildHeadings(LEFT, `Deleted Department ${deptName}.`))
+                                    chalk.red(buildHeadings(LEFT, `Deleted Department ${name}.`))
                                 );
                                 pressAnyKey()
                                     .then(() => {
@@ -666,12 +666,12 @@ const addRole = () => {
 // Input:    <none>
 // Returns:  <none>  
 // -----------------------------------------------------------------------------
-const updateRole = (id, title) => {
+const updateRole = (id, name) => {
     console.clear();
     console.log(
         chalk.blue(buildHeadings(CENTER, 'UPDATE ROLE'))
     );
-    console.log(`Role: ${id.trim()} - ${title.trim()}\n`);
+    console.log(`Role: ${id.trim()} - ${name.trim()}\n`);
     // prompt for info department
     inquirer
         .prompt([
@@ -699,7 +699,7 @@ const updateRole = (id, title) => {
             {
                 name: 'department',
                 type: 'list',
-                pageSize: 12,
+                pageSize: 20,
                 message: 'Select new department or ** Same **',
                 choices: deptArray,
                 when: (answers) => answers.title.toLowerCase() !== 'delete'
@@ -707,8 +707,6 @@ const updateRole = (id, title) => {
         ])
         .then((answer) => {
             const title = answer.title.trim();
-            const salary = answer.salary.trim();
-            const department = answer.department.trim();
             switch (title.toUpperCase()) {
                 case 'DELETE':
                     roleObj.setId(id);
@@ -717,7 +715,7 @@ const updateRole = (id, title) => {
                         if (resultSet.length > 0) {
                             console.clear();
                             console.log(
-                                chalk.red(buildHeadings(LEFT, `Role ${answer.title} cannot be deleted because it is used by employees:`))
+                                chalk.red(buildHeadings(LEFT, `Role ${name} cannot be deleted because it is used by employees:`))
                             );
                             chalk.red(console.table(resultSet));
                             pressAnyKey()
@@ -729,7 +727,7 @@ const updateRole = (id, title) => {
                                 if (err) throw err;
                                 console.clear();
                                 console.log(
-                                    chalk.red(buildHeadings(LEFT, `Deleted Role ${title}.`))
+                                    chalk.red(buildHeadings(LEFT, `Deleted Role ${name}.`))
                                 );
                                 pressAnyKey()
                                     .then(() => {
@@ -740,6 +738,10 @@ const updateRole = (id, title) => {
                     })
                     break;
                 default:
+                    let title = answer.title.trim();
+                    if (title == '') title = name;
+                    const salary = answer.salary.trim();
+                    const department = answer.department.trim();
                     roleObj.setId(id);
                     roleObj.getRecord(connection, () => {
                         if (title !== '') roleObj.setTitle(title);
@@ -1019,6 +1021,7 @@ const updateEmployee = (id, name) => {
                         };
                         result = empObj.update(connection, (err, result) => {
                             if (err) throw err;
+                            console.clear();
                             console.log(
                                 chalk.green(buildHeadings(LEFT, `Updated Employee ${empObj.getFirst_Name()} ${empObj.getLast_Name()}.`))
                             );
