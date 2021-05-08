@@ -40,6 +40,9 @@ The following steps should be used to install:
 ## Usage 🧮
 node employeeManager.js
 
+![Demo Video 1](./Assets/video/EmployeeMangerPart1.mp4)
+![Demo Video 2](./Assets/video/EmployeeMangerPart2.mp4)
+
 ![Initial Application Screen](./Assets/images/WelcomePage.png)
 ![Maintenance Menu](./Assets/images/MaintenanceMenu.png)
 ![Reports Menu](./Assets/images/ReportsMenu.png)
