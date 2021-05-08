@@ -1,3 +1,10 @@
+-- -----------------------------------------------------------------------------
+-- Script:   employeesSeeds.sql
+-- Purpose:  This script will load inital data for the employee manager application
+-- -----------------------------------------------------------------------------
+-- Author:   Mark Harrison
+-- Date:     May 7, 2021
+-- -----------------------------------------------------------------------------
 
 USE employeesDB;
 
@@ -14,6 +21,8 @@ VALUES
   ('Marketing');
 
 -- Populate initial values for the role table
+-- Use subselect to avoid hardcoding of department_id. That way this could run
+--    without dropping either the schema or table
 INSERT INTO 
   role 
     (title, salary, department_id)
@@ -66,7 +75,7 @@ VALUES
                                  department
 							                 WHERE
                                  lower(name) = 'engineering' LIMIT 1)),
-  ('Vice-President of HR', 1500000.00, (SELECT
+  ('Vice-President of HR', 150000.00, (SELECT
                                           min(id)
 							                          FROM
                                           department
@@ -78,7 +87,7 @@ VALUES
                              department
 							             WHERE
                              lower(name) = 'human resources' LIMIT 1)),
-  ('Systems Architect', 1200000.00, (SELECT
+  ('Systems Architect', 120000.00, (SELECT
                                                min(id)
 					                                   FROM
                                                department
@@ -98,6 +107,10 @@ VALUES
                               lower(name) = 'administration' LIMIT 1));
 
 -- Populate initial values for the employee table
+-- Use subselect to avoid hardcoding of role_id. That way this could run
+--    without dropping either the schema or table
+-- Use CTE to avoid hardcoding of manager_id. This is necessary because MySQL
+--    does not permit a join back to the base table
 INSERT INTO 
   employee
     (first_name, last_name, role_id, manager_id)
@@ -318,3 +331,4 @@ VALUES
                                                               id 
 												                                    FROM 
                                                               newMgr));
+                                                              

@@ -1,3 +1,11 @@
+-- -----------------------------------------------------------------------------
+-- Script:   employeesSchema.sql
+-- Purpose:  This script will create a schema for the employee manager application
+-- -----------------------------------------------------------------------------
+-- Author:   Mark Harrison
+-- Date:     May 7, 2021
+-- -----------------------------------------------------------------------------
+
 DROP DATABASE IF EXISTS employeesDB;
 
 CREATE DATABASE employeesDB;
@@ -30,6 +38,7 @@ CREATE TABLE employee (
   CONSTRAINT FK_managerEmployee FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE RESTRICT
 );
 
+-- View used to list role information by joining to department table
 CREATE OR REPLACE VIEW roleInfo (
   id,
   title,
@@ -50,6 +59,7 @@ AS
         ON r.department_id = d.id
 ;
 
+-- View used to list employee information by joining to roleInfo view
 CREATE OR REPLACE VIEW empInfo (
   id,
   first_name,
@@ -82,6 +92,7 @@ AS
         ON e.manager_id = m.id
 ;
 
+-- View used to list department info with salary summary based upon employees within dept
 CREATE OR REPLACE VIEW deptInfo (
   id,
   name,
